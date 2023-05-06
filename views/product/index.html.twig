@@ -1,0 +1,69 @@
+{% extends "template.html" %}
+
+{% block title %}Product{% endblock %}
+
+{% block action %}
+  {% include 'components/button-action.html' with {'name': 'Create', 'url': '/product/create'} %}
+{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="products-table">
+                  <thead class="thead-light">
+                  <tr>
+                    <th class="no-sort"></th>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Purchase Price</th>
+                    <th>Sales Price</th>
+                    <th>Qty</th>
+                  </tr>
+                  </thead>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script>
+    $(function () {
+      $('#products-table').DataTable({
+        ...window.defaultTableProps,
+        ajax: {
+          url: '/product/data',
+          dataSrc: 'data'
+        },
+        columns: [
+          {data: 'id'},
+          {data: 'code'},
+          {data: 'name'},
+          {data: 'category'},
+          {data: 'purchase_price'},
+          {data: 'sales_price'},
+          {data: 'qty'},
+        ],
+        columnDefs: [
+          {targets: 'no-sort', orderable: false}
+        ],
+        "rowCallback": function (row, data, displayNum, displayIndex, dataIndex) {
+          var pathName = window.location.pathname + '/' + data.id + '/edit'
+          $('td:eq(0)', row).html('<a href="'+ pathName + '" class="btn btn-warning">Edit</a>');
+          return row;
+        },
+        order: [[1, 'asc']]
+      });
+    });
+  </script>
+{% endblock %}

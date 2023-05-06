@@ -1,0 +1,36 @@
+{% extends "template.html" %}
+
+{% block title %}Product{% endblock %}
+
+{% block action %}
+  {% include 'components/button-action.html' with {'name': 'List', 'url': '/product'} %}
+  {% include 'components/button-action.html' with {'name': 'Create', 'url': '/product/create'} %}
+{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-12">
+      <form method="POST" action="/product{{ '/' ~ product.id }}">
+        <input type="hidden" name="_method" value="PUT" />
+        <div class="card">
+          <div class="card-body col-12 col-md-6">
+            {% include 'components/input-text.html' with {'name': 'code', 'label': 'Code', 'value': product.code} %}
+            {% include 'components/input-text.html' with {'name': 'name', 'label': 'Name', 'value': product.name} %}
+            {% include 'components/input-text.html' with {'name': 'category', 'label': 'Category', 'value': product.category} %}
+            {% include 'components/input-text.html' with {'name': 'purchase_price', 'label': 'Purchase Price', 'type': 'number', 'value': product.purchase_price} %}
+            {% include 'components/input-text.html' with {'name': 'sales_price', 'label': 'Sales Price', 'type': 'number', 'value': product.sales_price} %}
+            {% include 'components/input-text.html' with {'name': 'qty', 'label': 'Qty', 'type': 'number', 'value': product.qty} %}
+            <button type="submit" class="btn btn-warning col-12 col-md-2">Save</button>
+          </div>
+        </div>
+      </form>
+      <div class="card-footer">
+        <form class="delete d-flex d-md-inline flex-column" action="{{'/product/' ~ product.id ~ '/delete'}}" method="POST"
+              onSubmit="return confirm('Are you sure you want to delete this product?')">
+          <input type="hidden" name="_method" value="DELETE">
+          <input class="btn btn-danger col-12 col-md-1" type="submit" value="Delete">
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

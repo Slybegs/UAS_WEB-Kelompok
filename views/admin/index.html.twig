@@ -1,0 +1,61 @@
+{% extends "template.html" %}
+
+{% block title %}Admin{% endblock %}
+
+{% block action %}
+  {% include 'components/button-action.html' with {'name': 'Create', 'url': '/admin/create'} %}
+{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="admins-table">
+                  <thead class="thead-light">
+                  <tr>
+                    <th class="no-sort"></th>
+                    <th>Name</th>
+                    <th>Email</th>
+                  </tr>
+                  </thead>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script>
+    $(function () {
+      $('#admins-table').DataTable({
+        ...window.defaultTableProps,
+        ajax: {
+          url: '/admin/data',
+          dataSrc: 'data'
+        },
+        columns: [
+          {data: 'id', name: 'id'},
+          {data: 'name', name: 'name'},
+          {data: 'email', name: 'email'},
+        ],
+        columnDefs: [
+          {targets: 'no-sort', orderable: false}
+        ],
+        "rowCallback": function (row, data, displayNum, displayIndex, dataIndex) {
+          var pathName = window.location.pathname + '/' + data.id + '/edit'
+          $('td:eq(0)', row).html('<a href="'+ pathName + '" class="btn btn-warning">Edit</a>');
+          return row;
+        },
+        order: [[1, 'asc']]
+      });
+    });
+  </script>
+{% endblock %}

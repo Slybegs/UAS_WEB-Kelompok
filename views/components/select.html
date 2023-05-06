@@ -1,0 +1,9 @@
+<div class="form-group">
+  <label>{{ label }}</label>
+  <select class="form-control" name="{{ name }}" required>
+    <option></option>
+    {% for option in options %}
+      <option value="{{ option.value }}" {{ option.value == value|default('') ? 'selected' : '' }}>{{ option.label }}</option>
+    {% endfor %}
+  </select>
+</div>

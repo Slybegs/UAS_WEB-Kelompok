@@ -1,0 +1,13 @@
+{
+  "name": "pos/pos-web",
+  "description": "description",
+  "minimum-stability": "stable",
+  "require": {
+    "twig/twig": "^3.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
+    }
+  }
+}

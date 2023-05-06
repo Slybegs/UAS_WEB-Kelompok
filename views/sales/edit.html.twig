@@ -1,0 +1,238 @@
+{% extends "template.html" %}
+
+{% block title %}Sales{% endblock %}
+
+{% block head %}
+  <style>
+    .btn-outline-dark:not(:disabled):not(.disabled).active,
+    .btn-outline-dark:not(:disabled):not(.disabled):active,
+    .btn-outline-dark:hover {
+      color: #212529;
+      background-color: #ffc107;
+      border-color: #ffc107;
+    }
+  </style>
+{% endblock %}
+
+{% block action %}
+  {% include 'components/button-action.html' with {'name': 'List', 'url': '/product'} %}
+{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="row mx-0">
+          <div class="card-body col-12 col-md-6">
+            <div class="row">
+              <div class="col-12 col-md-6 mb-3 mb-md-0">
+                <div class="btn-group-toggle" data-toggle="buttons">
+                  <label class="btn btn-outline-dark">
+                    <input type="radio" checked autocomplete="off" value="" name="category"> All
+                  </label>
+                  {% for category in categories %}
+                    <label class="btn btn-outline-dark">
+                      <input type="radio" autocomplete="off" value="{{ category.category }}" name="category">{{ category.category }}
+                    </label>
+                  {% endfor %}
+                </div>
+              </div>
+              <div class=" col-12 col-md-6">
+                <input type="text" class="form-control" name="search" placeholder="Search" autocomplete="off">
+              </div>
+            </div>
+            <div class="row mt-3" id="product-list">
+              {% for product in products %}
+                <div class="col-6 col-md-3 text-center mb-3">
+                  <div class="card card-block d-flex"
+                       role='button'
+                       data-product-id="{{ product.id }}"
+                       data-product-category="{{ product.category }}"
+                       data-product-sales-price="{{ product.sales_price + 0 }}">
+                    <div class="card-body align-items-center d-flex justify-content-center">{{ product.name }}</div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          <form class="card-body col-12 col-md-6" method="POST" action="/sales{{ '/' ~ sales.id }}">
+            <input type="hidden" name="_method" value="PUT" />
+            <p class="text-right">
+              {{ 'Date: ' ~ sales.date }}
+            </p>
+            {% include 'components/select.html' with {'name': 'customer_id', 'label': 'Customer', 'options': customers, 'value': sales.customer_id} %}
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover" id="sales-table">
+                <thead class="thead-light">
+                <tr>
+                  <th class="no-sort"></th>
+                  <th>Name</th>
+                  <th>Price</th>
+                  <th>Qty</th>
+                  <th>Total</th>
+                </tr>
+                </thead>
+                <tfoot>
+                <tr>
+                  <th colspan="4" style="text-align:right">Total:</th>
+                  <th></th>
+                </tr>
+                </tfoot>
+              </table>
+            </div>
+            <button type="submit" class="btn btn-warning mt-3 col-12 col-md-4 float-right">Save</button>
+          </form>
+
+          <div class="card-footer col-12">
+            <form class="delete d-flex d-md-inline flex-column" action="{{'/sales/' ~ sales.id ~ '/delete'}}" method="POST"
+                  onSubmit="return confirm('Are you sure you want to delete this sales?')">
+              <input type="hidden" name="_method" value="DELETE">
+              <input class="btn btn-danger float-right" type="submit" value="Delete">
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script>
+    $(function () {
+      let table = $('#sales-table').DataTable({
+        paging: false,
+        info: false,
+        searching: false,
+        columns: [
+          {data: 'id'},
+          {data: 'name'},
+          {data: 'price'},
+          {data: 'qty'},
+          {
+            data: null,
+            render: function (data, type, row) {
+              return (data['price'] * data['qty']).toLocaleString()
+            }
+          }
+        ],
+        columnDefs: [
+          {
+            targets: 'no-sort',
+            orderable: false
+          },
+          {
+            targets: [0],
+            width: 20
+          },
+          {
+            targets: [2,3,4],
+            width: 100
+          }
+        ],
+        "rowCallback": function (row, data, displayNum, displayIndex, dataIndex) {
+          var index = displayIndex + 1;
+          $('td:eq(0)', row).html('<input type="hidden" value="' + data.id + '" name="detail[' + index + '][product_id]">' + index);
+          $('td:eq(2)', row).html('<input type="hidden" value="'+ data.price + '" name="detail[' + index + '][price]">' + data.price.toLocaleString());
+          //Qty
+          $('td:eq(3)', row).html(
+                  '<div class="input-group mb-3">' +
+                  '<div class="input-group-prepend">' +
+                  '<button class="btn btn-outline-secondary btn-substract-qty" type="button">-</button>' +
+                  '</div>' +
+                  '<input type="text" class="form-control text-center" value="'+ data.qty + '" name="detail[' + index + '][qty]">' +
+                  '<div class="input-group-prepend">' +
+                  '<button class="btn btn-outline-secondary btn-add-qty" type="button">+</button>' +
+                  '</div>' +
+                  '</div>'
+          );
+          return row;
+        },
+        footerCallback: function (row, data, start, end, display) {
+          var api = this.api();
+
+          // Total over all pages
+          total = api
+                  .data()
+                  .reduce(function (a, b) {
+                    return a + (b.qty * b.price);
+                  }, 0);
+
+          // Update footer
+          $(api.column(4).footer()).html('IDR ' + total.toLocaleString());
+        },
+      });
+
+
+      $('#product-list .card').on('click', function () {
+        var id = $(this).data('product-id');
+        let uniqueIds = table.column( 0 ).data().unique().toArray();
+        if (!uniqueIds.includes(id)) {
+          table.row.add({
+            'id': $(this).data('product-id'),
+            'name': $(this).find('.card-body').text(),
+            'price': $(this).data('product-sales-price'),
+            'qty': 1,
+          }).draw(false);
+        } else {
+          var row = table.row(function ( idx, data, node ) {
+            return data.id === id;
+          })
+          var data = row.data();
+          data.qty = data.qty + 1
+          row.data(data).draw(false)
+        }
+      });
+
+      $('#sales-table tbody').on('click', '.btn-substract-qty', function () {
+        var data = table.row($(this).parents('tr')).data();
+        if (data.qty > 1) {
+          data.qty = data.qty - 1;
+          table.row($(this).parents('tr')).data(data).draw(false);
+        }
+      })
+
+      $('#sales-table tbody').on('click', '.btn-add-qty', function () {
+        var data = table.row($(this).parents('tr')).data();
+        data.qty = data.qty + 1;
+        table.row($(this).parents('tr')).data(data).draw(false);
+      })
+
+      function searchAndFilterProducts () {
+        var filter = $('input[type=radio][name=category]:checked').val();
+        $('#product-list .card').each(function(i, obj) {
+          var isFiltered = false;
+          if (filter !== '' && $(this).data('product-category') !== filter) {
+            $(this).parent().addClass('d-none');
+            isFiltered = true;
+          } else {
+            $(this).parent().removeClass('d-none');
+          }
+          if (!isFiltered) {
+            var search = $('input[type=text][name=search]').val().toLowerCase()
+            if (search !== '') {
+              if ($(this).find('.card-body').text().toLowerCase().search(search) < 0) {
+                $(this).parent().addClass('d-none');
+              } else {
+                $(this).parent().removeClass('d-none');
+              }
+            }
+          }
+        });
+      }
+
+      $('input[type=radio][name=category]').change(searchAndFilterProducts);
+
+      $('input[type=text][name=search]').keyup(searchAndFilterProducts);
+
+      {% for detail in details %}
+        table.row.add({
+          'id': {{ detail.product_id }},
+          'name': '{{ detail.product_name }}',
+          'price': {{ detail.price + 0 }},
+          'qty': {{ detail.qty }},
+        }).draw(false);
+      {% endfor %}
+
+    });
+  </script>
+{% endblock %}

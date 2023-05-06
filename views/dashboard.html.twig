@@ -1,0 +1,196 @@
+{% extends "template.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block head %}
+    <style>
+        .card-title {
+            border-bottom: 2.5px solid #ffc107;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 col-md-4">
+        <div class="card mb-3 mb-md-0">
+            <div class="card-body">
+                <div class="card-title pb-2">Total Profit</div>
+                <p class="card-text h3">{{ totalProfit|number_format }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card mb-3 mb-md-0">
+            <div class="card-body">
+                <div class="card-title pb-2">Total Sales</div>
+                <p class="card-text h3">{{ totalSales|number_format }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card mb-3 mb-md-0">
+            <div class="card-body">
+                <div class="card-title pb-2">Total Customer</div>
+                <p class="card-text h3">{{ totalCustomer|number_format }}</p>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-12 col-md-8">
+        <div class="card mt-0 mt-md-3 mb-3 mb-md-0">
+            <div class="card-body">
+                <div class="card-title pb-2">Monthly Sales</div>
+                <canvas id="myChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card mt-0 mt-md-3 mb-3 mb-md-0">
+            <div class="card-body">
+                <div class="card-title pb-2">Reminder Low Supply</div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="sales-table">
+                        <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Qty</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for product in lowSupplyProducts %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.qty|number_format }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="2" class="text-center">No Data</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-8">
+        <div class="card mt-0 mt-md-3 mb-3 mb-md-0">
+            <div class="card-body">
+                <div class="card-title pb-2">Top 5 Customer</div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="customers-table">
+                        <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Total Purchase</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for topCustomer in top5Customers %}
+                            <tr>
+                                <td>{{ topCustomer.customer_name }}</td>
+                                <td>{{ topCustomer.total_purchase|number_format }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="2" class="text-center">No Data</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card mt-0 mt-md-3 mb-3 mb-md-0">
+            <div class="card-body">
+                <div class="card-title pb-2">Top 5 Product</div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="sales-table">
+                        <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Total Sales Qty</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for top in top5Products %}
+                            <tr>
+                                <td>{{ top.product_name }}</td>
+                                <td>{{ top.total_sales|number_format }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="2" class="text-center">No Data</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <script>
+
+        var labels = [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December'
+        ];
+
+        function random_rgba(count) {
+            var result = {
+                background: [],
+                border: []
+            };
+            for (var i = 0; i < count; i++) {
+                var o = Math.round, r = Math.random, s = 255;
+                var rgb = 'rgba(' + o(r() * s) + ',' + o(r() * s) + ',' + o(r() * s);
+                result.background.push(rgb + ', 0.2)')
+                result.background.push(rgb + ', 1)')
+            }
+            return result;
+        }
+
+        var chartColor = random_rgba(12);
+
+        new Chart("myChart", {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: (new Date()).getFullYear(),
+                    data: {{ totalSalesPerMonth|json_encode }},
+                    backgroundColor: chartColor.background,
+                    borderColor: chartColor.border,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            },
+
+        });
+    </script>
+{% endblock %}

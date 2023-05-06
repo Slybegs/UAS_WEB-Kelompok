@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>POS</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- Core theme CSS (includes Bootstrap)-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+  <link href="/resources/css/simple-sidebar.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous"/>
+  {% block head %}{% endblock %}
+</head>
+<body>
+<div class="d-flex" id="wrapper">
+  <!-- Sidebar-->
+  <div class="border-right" id="sidebar-wrapper">
+    <div class="sidebar-heading"><b>POS</b></div>
+    <div class="list-group">
+      <a class="list-group-item list-group-item-action {{ urlPrefix is same as '' ? 'active' : ''}}" href="/">
+        <span class="position-relative mr-1">
+          <i class="fa fa-fw fa-home" aria-hidden="true"></i>
+        </span>Dashboard
+      </a>
+      <a class="list-group-item list-group-item-action {{ urlPrefix is same as 'admin' ? 'active' : ''}}" href="/admin">
+        <span class="position-relative mr-1">
+          <i class="fa fa-fw fa-user" aria-hidden="true"></i>
+        </span>Admin
+      </a>
+      <a class="list-group-item list-group-item-action {{ urlPrefix is same as 'customer' ? 'active' : ''}}" href="/customer">
+        <span class="position-relative mr-1">
+          <i class="fa fa-fw fa-users" aria-hidden="true"></i>
+        </span>Customer
+      </a>
+      <a class="list-group-item list-group-item-action {{ urlPrefix is same as 'product' ? 'active' : ''}}" href="/product">
+
+        <span class="position-relative mr-1">
+          <i class="fa fa-fw fa-home" aria-hidden="true"></i>
+          </span>Product
+      </a>
+      <a class="list-group-item list-group-item-action {{ urlPrefix is same as 'sales' ? 'active' : ''}}" href="/sales">
+
+        <span class="position-relative mr-1">
+          <i class="fa fa-fw fa-receipt" aria-hidden="true"></i>
+          </span>Sales
+      </a>
+      <a class="list-group-item list-group-item-action {{ urlPrefix is same as 'report' ? 'active' : ''}}" href="/report">
+
+        <span class="position-relative mr-1">
+          <i class="fa fa-fw fa-report" aria-hidden="true"></i>
+          </span>Report
+      </a>
+    </div>
+  </div>
+  <!-- Page Content-->
+  <div id="page-content-wrapper">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+      <button class="btn btn-outline-warning color-white" id="menu-toggle"><i class="fa fa-bars"></i></button>
+
+      <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+        <li class="nav-item active">
+          <a class="nav-link" href="/logout">
+            Logout
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h2 class="my-3">{% block title %}Home{% endblock %}</h2>
+        </div>
+        <div class="col-sm-6">
+          <div class="float-sm-right mt-3 d-flex">
+            {% block action %}{% endblock %}
+          </div>
+        </div>
+      </div>
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+<script defer src="https://use.fontawesome.com/releases/v5.15.4/js/all.js" integrity="sha384-rOA1PnstxnOBLzCLMcre8ybwbTmemjzdNlILg8O7z1lUkLXozs4DHonlDtnE7fpc" crossorigin="anonymous"></script>
+<!-- Core theme JS-->
+<script>
+  window.defaultTableProps = {
+    processing: true,
+    serverSide: false,
+    pageLength: 10,
+  }
+</script>
+<script>
+  $("#menu-toggle").click(function (e) {
+    e.preventDefault();
+    $("#wrapper").toggleClass("toggled");
+  });
+</script>
+{% block script %}{% endblock %}
+</body>
+</html>

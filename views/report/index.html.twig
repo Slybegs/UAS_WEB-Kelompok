@@ -1,0 +1,92 @@
+{% extends "template.html" %}
+
+{% block title %}Report{% endblock %}
+
+{% block action %}
+  {% include 'components/button-action.html' with {'name': 'Create', 'url': '/admin/create'} %}
+{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-sm-4">
+                {% include 'components/input-text.html' with {'name': 'month', 'label': 'Month', 'type': 'month', 'value': now|date('Y-m')} %}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="report-table">
+                  <thead class="thead-light">
+                    <tr>
+                        <th>Product</th>
+                        <th>Purchase</th>
+                        <th>Sales</th>
+                        <th>Profit</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th colspan="3" style="text-align:right">Total:</th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script>
+    $(function () {
+        
+        const getFilter = function (d) {
+            let month = $('input[name="month"]').val();
+            if(month) {
+                d.month = month
+            }
+        };
+
+        let table = $('#report-table').DataTable({
+            ...window.defaultTableProps,
+            ajax: {
+                url: '/report/data',
+                data: getFilter,
+                dataSrc: 'data'
+            },
+            columns: [
+                {data: 'product_name', name: 'product_name'},
+                {data: 'purchase', name: 'purchase', render: $.fn.dataTable.render.number(',', '.', 0, '')},
+                {data: 'sales', name: 'sales', render: $.fn.dataTable.render.number(',', '.', 0, '')},
+                {data: 'profit', name: 'profit', render: $.fn.dataTable.render.number(',', '.', 0, '')},
+            ],
+            footerCallback: function (row, data, start, end, display) {
+                var api = this.api();
+
+                // Total over all pages
+                total = api
+                        .data()
+                        .reduce(function (a, b) {
+                            return a + Number(b.profit);
+                        }, 0);
+
+                // Update footer
+                $(api.column(3).footer()).html(total.toLocaleString());
+            },
+            order: [[3, 'desc']]
+        });
+
+        $('input[name=month]').on('change', function () {
+            table.ajax.reload();
+        });
+    });
+  </script>
+{% endblock %}

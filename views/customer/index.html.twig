@@ -1,0 +1,63 @@
+{% extends "template.html" %}
+
+{% block title %}Customer{% endblock %}
+
+{% block action %}
+  {% include 'components/button-action.html' with {'name': 'Create', 'url': '/customer/create'} %}
+{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="customers-table">
+                  <thead class="thead-light">
+                  <tr>
+                    <th class="no-sort"></th>
+                    <th>Name</th>
+                    <th>Phone No</th>
+                    <th>Address</th>
+                  </tr>
+                  </thead>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script>
+    $(function () {
+      $('#customers-table').DataTable({
+        ...window.defaultTableProps,
+        ajax: {
+          url: '/customer/data',
+          dataSrc: 'data'
+        },
+        columns: [
+          {data: 'id'},
+          {data: 'name'},
+          {data: 'phone_number'},
+          {data: 'address'}
+        ],
+        columnDefs: [
+          {targets: 'no-sort', orderable: false}
+        ],
+        "rowCallback": function (row, data, displayNum, displayIndex, dataIndex) {
+          var pathName = window.location.pathname + '/' + data.id + '/edit'
+          $('td:eq(0)', row).html('<a href="'+ pathName + '" class="btn btn-warning">Edit</a>');
+          return row;
+        },
+        order: [[1, 'asc']]
+      });
+    });
+  </script>
+{% endblock %}
